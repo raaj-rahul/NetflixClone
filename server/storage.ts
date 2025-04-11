@@ -90,6 +90,7 @@ export class MemStorage implements IStorage {
       password: "password123",
       email: "user@example.com",
       profileImageUrl: "https://randomuser.me/api/portraits/men/32.jpg",
+      name: "Netflix User",
     };
     this.createUser(user);
 
@@ -426,7 +427,13 @@ export class MemStorage implements IStorage {
 
   async createUser(insertUser: InsertUser): Promise<User> {
     const id = this.userCurrentId++;
-    const user: User = { ...insertUser, id };
+    // Ensure properties with null values are explicitly set
+    const user: User = { 
+      ...insertUser, 
+      id,
+      profileImageUrl: insertUser.profileImageUrl || null,
+      name: insertUser.name || "User"
+    };
     this.users.set(id, user);
     return user;
   }
@@ -510,7 +517,12 @@ export class MemStorage implements IStorage {
 
   async createProfile(insertProfile: InsertProfile): Promise<Profile> {
     const id = this.profileCurrentId++;
-    const profile: Profile = { ...insertProfile, id };
+    // Ensure isKids is explicitly set to prevent type issues
+    const profile: Profile = { 
+      ...insertProfile, 
+      id,
+      isKids: insertProfile.isKids || false
+    };
     this.profiles.set(id, profile);
     return profile;
   }

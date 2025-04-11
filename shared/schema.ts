@@ -9,6 +9,7 @@ export const users = pgTable("users", {
   password: text("password").notNull(),
   email: text("email").notNull().unique(),
   profileImageUrl: text("profile_image_url"),
+  name: text("name").default("User"),
 });
 
 export const insertUserSchema = createInsertSchema(users).pick({
@@ -16,6 +17,7 @@ export const insertUserSchema = createInsertSchema(users).pick({
   password: true,
   email: true,
   profileImageUrl: true,
+  name: true,
 });
 
 // Content table - for both movies and TV shows
