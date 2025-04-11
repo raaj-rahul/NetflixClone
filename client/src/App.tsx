@@ -8,6 +8,7 @@ import Browse from "@/pages/browse";
 import AuthPage from "@/pages/auth-page";
 import Account from "@/pages/account";
 import ManageProfiles from "@/pages/manage-profiles";
+import Logout from "@/pages/logout";
 import { useEffect, useState } from "react";
 import { AuthProvider } from "@/hooks/use-auth";
 import { ProtectedRoute } from "@/lib/protected-route";
@@ -36,6 +37,7 @@ function Router() {
       <ProtectedRoute path="/kids" component={Browse} />
       <ProtectedRoute path="/account" component={Account} />
       <ProtectedRoute path="/manage-profiles" component={ManageProfiles} />
+      <ProtectedRoute path="/logout" component={Logout} />
       <Route path="/auth" component={AuthPage} />
       <Route component={NotFound} />
     </Switch>
