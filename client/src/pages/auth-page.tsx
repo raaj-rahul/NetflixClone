@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -40,22 +40,19 @@ export default function AuthPage() {
   const { user, isLoading, loginMutation, registerMutation } = useAuth();
   const { toast } = useToast();
 
+  // States for register form
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [registerErrors, setRegisterErrors] = useState<Record<string, string>>({});
+
   const loginForm = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
       username: "",
       password: "",
-    },
-  });
-
-  const registerForm = useForm<RegisterFormValues>({
-    resolver: zodResolver(registerSchema),
-    defaultValues: {
-      username: "",
-      email: "",
-      name: "",
-      password: "",
-      confirmPassword: "",
     },
   });
   
@@ -65,7 +62,13 @@ export default function AuthPage() {
     if (isLoginMode) {
       loginForm.reset();
     } else {
-      registerForm.reset();
+      // Reset register form state
+      setName("");
+      setEmail("");
+      setUsername("");
+      setPassword("");
+      setConfirmPassword("");
+      setRegisterErrors({});
     }
   };
 
@@ -81,17 +84,36 @@ export default function AuthPage() {
     });
   };
 
-  const onRegisterSubmit = (values: RegisterFormValues) => {
-    const { confirmPassword, ...registerData } = values;
-    registerMutation.mutate(registerData, {
-      onError: (error: Error) => {
-        toast({
-          title: "Registration failed",
-          description: error.message || "Could not create account",
-          variant: "destructive",
-        });
-      }
-    });
+  const validateRegisterForm = () => {
+    const errors: Record<string, string> = {};
+    if (!name) errors.name = "Name is required";
+    if (!email) errors.email = "Email is required";
+    else if (!/\S+@\S+\.\S+/.test(email)) errors.email = "Invalid email address";
+    if (!username) errors.username = "Username is required";
+    else if (username.length < 3) errors.username = "Username must be at least 3 characters";
+    if (!password) errors.password = "Password is required";
+    else if (password.length < 6) errors.password = "Password must be at least 6 characters";
+    if (password !== confirmPassword) errors.confirmPassword = "Passwords don't match";
+    
+    setRegisterErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const handleRegisterSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    
+    if (validateRegisterForm()) {
+      const registerData = { name, email, username, password };
+      registerMutation.mutate(registerData, {
+        onError: (error: Error) => {
+          toast({
+            title: "Registration failed",
+            description: error.message || "Could not create account",
+            variant: "destructive",
+          });
+        }
+      });
+    }
   };
 
   // If user is already logged in, redirect to home page
@@ -171,121 +193,94 @@ export default function AuthPage() {
                 </form>
               </Form>
             ) : (
-              <Form {...registerForm}>
-                <form onSubmit={registerForm.handleSubmit(onRegisterSubmit)} className="space-y-4">
-                  <FormField
-                    control={registerForm.control}
-                    name="name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-gray-300">Name</FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="Enter your name"
-                            className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400"
-                            value={field.value || ""}
-                            onChange={field.onChange}
-                            onBlur={field.onBlur}
-                            ref={field.ref}
-                            name={field.name}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+              <form onSubmit={handleRegisterSubmit} className="space-y-4">
+                <div>
+                  <label htmlFor="name" className="block text-gray-300 mb-1">Name</label>
+                  <input
+                    id="name"
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Enter your name"
+                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white placeholder:text-gray-400"
                   />
-                  <FormField
-                    control={registerForm.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-gray-300">Email</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="email"
-                            placeholder="Enter your email"
-                            className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400"
-                            value={field.value || ""}
-                            onChange={field.onChange}
-                            onBlur={field.onBlur}
-                            ref={field.ref}
-                            name={field.name}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                  {registerErrors.name && (
+                    <p className="text-sm font-medium text-red-500 mt-1">{registerErrors.name}</p>
+                  )}
+                </div>
+                
+                <div>
+                  <label htmlFor="email" className="block text-gray-300 mb-1">Email</label>
+                  <input
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="Enter your email"
+                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white placeholder:text-gray-400"
                   />
-                  <FormField
-                    control={registerForm.control}
-                    name="username"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-gray-300">Username</FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="Create a username"
-                            className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400"
-                            value={field.value || ""}
-                            onChange={field.onChange}
-                            onBlur={field.onBlur}
-                            ref={field.ref}
-                            name={field.name}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                  {registerErrors.email && (
+                    <p className="text-sm font-medium text-red-500 mt-1">{registerErrors.email}</p>
+                  )}
+                </div>
+                
+                <div>
+                  <label htmlFor="username" className="block text-gray-300 mb-1">Username</label>
+                  <input
+                    id="username"
+                    type="text"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    placeholder="Create a username"
+                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white placeholder:text-gray-400"
                   />
-                  <FormField
-                    control={registerForm.control}
-                    name="password"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-gray-300">Password</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="password"
-                            placeholder="Create a password"
-                            className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                  {registerErrors.username && (
+                    <p className="text-sm font-medium text-red-500 mt-1">{registerErrors.username}</p>
+                  )}
+                </div>
+                
+                <div>
+                  <label htmlFor="password" className="block text-gray-300 mb-1">Password</label>
+                  <input
+                    id="password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Create a password"
+                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white placeholder:text-gray-400"
                   />
-                  <FormField
-                    control={registerForm.control}
-                    name="confirmPassword"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-gray-300">Confirm Password</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="password"
-                            placeholder="Confirm your password"
-                            className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                  {registerErrors.password && (
+                    <p className="text-sm font-medium text-red-500 mt-1">{registerErrors.password}</p>
+                  )}
+                </div>
+                
+                <div>
+                  <label htmlFor="confirmPassword" className="block text-gray-300 mb-1">Confirm Password</label>
+                  <input
+                    id="confirmPassword"
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="Confirm your password"
+                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white placeholder:text-gray-400"
                   />
-                  <Button
-                    type="submit"
-                    className="w-full bg-[#E50914] hover:bg-[#f6121d] text-white font-bold py-3"
-                    disabled={registerMutation.isPending}
-                  >
-                    {registerMutation.isPending ? (
-                      <Loader2 className="h-5 w-5 animate-spin" />
-                    ) : (
-                      "Sign Up"
-                    )}
-                  </Button>
-                </form>
-              </Form>
+                  {registerErrors.confirmPassword && (
+                    <p className="text-sm font-medium text-red-500 mt-1">{registerErrors.confirmPassword}</p>
+                  )}
+                </div>
+                
+                <Button
+                  type="submit"
+                  className="w-full bg-[#E50914] hover:bg-[#f6121d] text-white font-bold py-3"
+                  disabled={registerMutation.isPending}
+                >
+                  {registerMutation.isPending ? (
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                  ) : (
+                    "Sign Up"
+                  )}
+                </Button>
+              </form>
             )}
 
             <div className="mt-4 text-gray-400">
