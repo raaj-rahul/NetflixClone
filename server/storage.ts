@@ -507,7 +507,11 @@ export class MemStorage implements IStorage {
 
   async createEpisode(insertEpisode: InsertEpisode): Promise<Episode> {
     const id = this.episodeCurrentId++;
-    const episode: Episode = { ...insertEpisode, id };
+    const episode: Episode = { 
+      ...insertEpisode, 
+      id,
+      videoUrl: insertEpisode.videoUrl || null
+    };
     this.episodes.set(id, episode);
     return episode;
   }
