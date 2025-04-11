@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { insertUserSchema } from "@shared/schema";
 import { useAuth } from "@/hooks/use-auth";
-import { Navigate } from "wouter";
+import { useLocation } from "wouter";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -61,7 +61,7 @@ export default function AuthPage() {
 
   const onLoginSubmit = (values: LoginFormValues) => {
     loginMutation.mutate(values, {
-      onError: (error) => {
+      onError: (error: Error) => {
         toast({
           title: "Login failed",
           description: error.message || "Invalid username or password",
@@ -74,7 +74,7 @@ export default function AuthPage() {
   const onRegisterSubmit = (values: RegisterFormValues) => {
     const { confirmPassword, ...registerData } = values;
     registerMutation.mutate(registerData, {
-      onError: (error) => {
+      onError: (error: Error) => {
         toast({
           title: "Registration failed",
           description: error.message || "Could not create account",
@@ -85,8 +85,11 @@ export default function AuthPage() {
   };
 
   // If user is already logged in, redirect to home page
+  const [, setLocation] = useLocation();
+  
   if (user) {
-    return <Navigate to="/" />;
+    setTimeout(() => setLocation("/"), 0);
+    return null;
   }
 
   return (

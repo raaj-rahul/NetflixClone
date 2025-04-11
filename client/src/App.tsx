@@ -5,7 +5,13 @@ import { Toaster } from "@/components/ui/toaster";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 import Browse from "@/pages/browse";
+import AuthPage from "@/pages/auth-page";
+import Account from "@/pages/account";
+import ManageProfiles from "@/pages/manage-profiles";
 import { useEffect, useState } from "react";
+import { AuthProvider } from "@/hooks/use-auth";
+import { ProtectedRoute } from "@/lib/protected-route";
+import { ContentModalProvider } from "@/components/content-modal";
 
 function Loading() {
   return (
@@ -22,12 +28,15 @@ function Loading() {
 function Router() {
   return (
     <Switch>
-      <Route path="/" component={Home} />
-      <Route path="/tv-shows" component={Browse} />
-      <Route path="/movies" component={Browse} />
-      <Route path="/new" component={Browse} />
-      <Route path="/my-list" component={Browse} />
-      <Route path="/kids" component={Browse} />
+      <ProtectedRoute path="/" component={Home} />
+      <ProtectedRoute path="/tv-shows" component={Browse} />
+      <ProtectedRoute path="/movies" component={Browse} />
+      <ProtectedRoute path="/new" component={Browse} />
+      <ProtectedRoute path="/my-list" component={Browse} />
+      <ProtectedRoute path="/kids" component={Browse} />
+      <ProtectedRoute path="/account" component={Account} />
+      <ProtectedRoute path="/manage-profiles" component={ManageProfiles} />
+      <Route path="/auth" component={AuthPage} />
       <Route component={NotFound} />
     </Switch>
   );
@@ -51,8 +60,12 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <Router />
-      <Toaster />
+      <AuthProvider>
+        <ContentModalProvider>
+          <Router />
+          <Toaster />
+        </ContentModalProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }
