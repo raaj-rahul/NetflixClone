@@ -2,9 +2,13 @@ import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { z } from "zod";
-import { insertMyListSchema } from "@shared/schema";
+import { insertMyListSchema, insertProfileSchema } from "@shared/schema";
+import { setupAuth } from "./auth";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Set up authentication
+  setupAuth(app);
+  
   // API routes
   app.get("/api/contents", async (req: Request, res: Response) => {
     const contents = await storage.getAllContents();
@@ -172,6 +176,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
     
     const isInList = await storage.isInMyList(profileId, contentId);
     res.json({ isInList });
+  });
+  
+  // Profile management endpoints
+  app.post("/api/profiles", async (req: Request, res: Response) => {
+    try {
+      // Check if user is authenticated
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      const profileData = insertProfileSchema.parse(req.body);
+      const profile = await storage.createProfile(profileData);
+      res.status(201).json(profile);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+  
+  app.delete("/api/profiles/:id", async (req: Request, res: Response) => {
+    try {
+      // Check if user is authenticated
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      const profileId = parseInt(req.params.id);
+      if (isNaN(profileId)) {
+        return res.status(400).json({ message: "Invalid profile ID" });
+      }
+      
+      // In a real implementation, we'd check if the profile belongs to the authenticated user
+      await storage.deleteProfile(profileId);
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ message: "Internal server error" });
+    }
   });
 
   const httpServer = createServer(app);

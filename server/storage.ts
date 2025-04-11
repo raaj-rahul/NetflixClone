@@ -5,6 +5,8 @@ import {
   profiles, type Profile, type InsertProfile,
   myList, type MyList, type InsertMyList
 } from "@shared/schema";
+import session from "express-session";
+import createMemoryStore from "memorystore";
 
 export interface IStorage {
   // User methods
@@ -31,12 +33,16 @@ export interface IStorage {
   getProfilesByUserId(userId: number): Promise<Profile[]>;
   getProfile(id: number): Promise<Profile | undefined>;
   createProfile(profile: InsertProfile): Promise<Profile>;
+  deleteProfile(id: number): Promise<void>;
   
   // My List methods
   getMyListByProfileId(profileId: number): Promise<Content[]>;
   addToMyList(myListItem: InsertMyList): Promise<MyList>;
   removeFromMyList(profileId: number, contentId: number): Promise<void>;
   isInMyList(profileId: number, contentId: number): Promise<boolean>;
+  
+  // Session store for authentication
+  sessionStore: any;
 }
 
 export class MemStorage implements IStorage {
@@ -52,6 +58,8 @@ export class MemStorage implements IStorage {
   private profileCurrentId: number;
   private myListCurrentId: number;
   
+  public sessionStore: any;
+  
   constructor() {
     this.users = new Map();
     this.contents = new Map();
@@ -64,6 +72,12 @@ export class MemStorage implements IStorage {
     this.episodeCurrentId = 1;
     this.profileCurrentId = 1;
     this.myListCurrentId = 1;
+    
+    // Create memory store for session
+    const MemoryStore = createMemoryStore(session);
+    this.sessionStore = new MemoryStore({
+      checkPeriod: 86400000 // prune expired entries every 24h
+    });
     
     // Initialize with some sample data
     this.initializeSampleData();
@@ -499,6 +513,18 @@ export class MemStorage implements IStorage {
     const profile: Profile = { ...insertProfile, id };
     this.profiles.set(id, profile);
     return profile;
+  }
+  
+  async deleteProfile(id: number): Promise<void> {
+    // Delete profile from profiles map
+    this.profiles.delete(id);
+    
+    // Delete related myList entries
+    for (const [myListId, myListItem] of this.myLists.entries()) {
+      if (myListItem.profileId === id) {
+        this.myLists.delete(myListId);
+      }
+    }
   }
 
   // My List methods
