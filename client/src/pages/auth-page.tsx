@@ -58,6 +58,16 @@ export default function AuthPage() {
       confirmPassword: "",
     },
   });
+  
+  // Reset form when switching between login/register
+  const handleFormSwitch = (isLoginMode: boolean) => {
+    setIsLogin(isLoginMode);
+    if (isLoginMode) {
+      loginForm.reset();
+    } else {
+      registerForm.reset();
+    }
+  };
 
   const onLoginSubmit = (values: LoginFormValues) => {
     loginMutation.mutate(values, {
@@ -173,7 +183,11 @@ export default function AuthPage() {
                           <Input
                             placeholder="Enter your name"
                             className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400"
-                            {...field}
+                            value={field.value || ""}
+                            onChange={field.onChange}
+                            onBlur={field.onBlur}
+                            ref={field.ref}
+                            name={field.name}
                           />
                         </FormControl>
                         <FormMessage />
@@ -191,7 +205,11 @@ export default function AuthPage() {
                             type="email"
                             placeholder="Enter your email"
                             className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400"
-                            {...field}
+                            value={field.value || ""}
+                            onChange={field.onChange}
+                            onBlur={field.onBlur}
+                            ref={field.ref}
+                            name={field.name}
                           />
                         </FormControl>
                         <FormMessage />
@@ -208,7 +226,11 @@ export default function AuthPage() {
                           <Input
                             placeholder="Create a username"
                             className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400"
-                            {...field}
+                            value={field.value || ""}
+                            onChange={field.onChange}
+                            onBlur={field.onBlur}
+                            ref={field.ref}
+                            name={field.name}
                           />
                         </FormControl>
                         <FormMessage />
@@ -270,7 +292,7 @@ export default function AuthPage() {
               <p>
                 {isLogin ? "New to Netflix?" : "Already have an account?"}{" "}
                 <button
-                  onClick={() => setIsLogin(!isLogin)}
+                  onClick={() => handleFormSwitch(!isLogin)}
                   className="text-white hover:underline ml-1"
                 >
                   {isLogin ? "Sign up now" : "Sign in"}
