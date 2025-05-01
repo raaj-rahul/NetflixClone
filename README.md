@@ -1,6 +1,6 @@
 # 🎬 Netflix – A Netflix Clone (Full-Stack)
 
-FeedbackFusion is a full-stack web application that mimics Netflix’s user interface and streaming layout using modern tools like **React 18**, **Tailwind CSS**, and **Express**. It supports authentication, persistent sessions, dynamic movie carousels, and embedded video players.
+This is a full-stack web application that mimics Netflix’s user interface and streaming layout using modern tools like **React 18**, **Tailwind CSS**, and **Express**. It supports authentication, persistent sessions, dynamic movie carousels, and embedded video players.
 
 ---
 
