@@ -91,5 +91,7 @@ Netflix Clone/
 ```
 ###📸 Screenshots
 
+![image](https://github.com/user-attachments/assets/f6d396ae-e4e2-4071-b28b-724f2101e655)
+
 
 
