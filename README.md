@@ -64,13 +64,11 @@ Edit
 npm run db:push
 5. Start development server
 bash
-Copy
-Edit
+
 npm run dev
 📁 Folder Structure
-arduino
-Copy
-Edit
+
+
 Netflix Clone/
 ├── public/
 ├── src/
