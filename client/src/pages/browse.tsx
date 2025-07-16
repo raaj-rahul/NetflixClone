@@ -7,7 +7,7 @@ import { useLocation } from "wouter";
 
 export default function Browse() {
   const [location] = useLocation();
-  const categoryPath = location.split("/")[1]; // Extract category from URL
+  const categoryPath = location.split("/")[1]; 
   const category = 
     categoryPath === "tv-shows" 
       ? "tvShows" 
