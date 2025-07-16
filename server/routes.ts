@@ -6,7 +6,7 @@ import { insertMyListSchema, insertProfileSchema } from "@shared/schema";
 import { setupAuth } from "./auth";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Set up authentication
+  // Set authentication
   setupAuth(app);
   
   // API routes
