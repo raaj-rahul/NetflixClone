@@ -40,7 +40,7 @@ export default function Account() {
   };
 
   const handleSave = () => {
-    // In a real app, this would call an API to update the user data
+    
     setEditMode(false);
     toast({
       title: "Profile updated",
